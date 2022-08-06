@@ -110,7 +110,7 @@ public class InitialHandler extends PacketHandler implements PendingConnection
     private LoginResult loginProfile;
     @Getter
     private boolean legacy;
-	@Getter
+    @Getter
     private boolean ImOffline;
     @Getter
     private String extraDataInHandshake = "";
@@ -457,7 +457,7 @@ public class InitialHandler extends PacketHandler implements PendingConnection
                             {
                                 Thread.sleep( 5000 );
                                 name = "-" + name;
-								ImOffline = true;
+                                ImOffline = true;
                                 onlineMode = false;
                                 thisState = InitialHandler.State.FINISHING;
                                 finish();
@@ -523,7 +523,7 @@ public class InitialHandler extends PacketHandler implements PendingConnection
                     {
                         name = "-" + InitialHandler.this.getName();
                         onlineMode = false;
-						ImOffline = true;
+                        ImOffline = true;
                     }
                     finish();
                     return;
@@ -533,7 +533,7 @@ public class InitialHandler extends PacketHandler implements PendingConnection
                     bungee.getLogger().log( Level.SEVERE, "Error authenticating " + getName() + " with minecraft.net", error );
                     name = "-" + InitialHandler.this.getName();
                     onlineMode = false;
-					ImOffline = true;
+                    ImOffline = true;
                     finish();
                     //disconnect( bungee.getTranslation( "mojang_fail" ) );
                 }
