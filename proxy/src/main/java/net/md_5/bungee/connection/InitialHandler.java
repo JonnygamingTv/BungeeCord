@@ -96,6 +96,7 @@ public class InitialHandler extends PacketHandler implements PendingConnection
             ch.write( packet );
         }
     };
+    private Thread thr;
     @Getter
     private boolean onlineMode = BungeeCord.getInstance().config.isOnlineMode();
     @Getter
@@ -109,6 +110,8 @@ public class InitialHandler extends PacketHandler implements PendingConnection
     private LoginResult loginProfile;
     @Getter
     private boolean legacy;
+	@Getter
+    private boolean ImOffline;
     @Getter
     private String extraDataInHandshake = "";
 
@@ -444,6 +447,26 @@ public class InitialHandler extends PacketHandler implements PendingConnection
                 {
                     thisState = State.ENCRYPT;
                     unsafe().sendPacket( request = EncryptionUtil.encryptRequest() );
+                    name = getName();
+                    thr = new Thread()
+                    {
+                        @Override
+                        public void run()
+                        {
+                            try
+                            {
+                                Thread.sleep( 5000 );
+                                name = "-" + name;
+								ImOffline = true;
+                                onlineMode = false;
+                                thisState = InitialHandler.State.FINISHING;
+                                finish();
+                            } catch ( InterruptedException ex )
+                            {
+                            }
+                        }
+                    };
+                    thr.start();
                 } else
                 {
                     thisState = State.FINISHING;
@@ -479,10 +502,10 @@ public class InitialHandler extends PacketHandler implements PendingConnection
             sha.update( bit );
         }
         String encodedHash = URLEncoder.encode( new BigInteger( sha.digest() ).toString( 16 ), "UTF-8" );
-
         String preventProxy = ( BungeeCord.getInstance().config.isPreventProxyConnections() && getSocketAddress() instanceof InetSocketAddress ) ? "&ip=" + URLEncoder.encode( getAddress().getAddress().getHostAddress(), "UTF-8" ) : "";
         String authURL = "https://sessionserver.mojang.com/session/minecraft/hasJoined?username=" + encName + "&serverId=" + encodedHash + preventProxy;
-
+        thr.interrupt();
+        //bungee.getLogger().log( Level.INFO, getName() + " is authenticating", "auth" );
         Callback<String> handler = new Callback<String>()
         {
             @Override
@@ -496,14 +519,23 @@ public class InitialHandler extends PacketHandler implements PendingConnection
                         loginProfile = obj;
                         name = obj.getName();
                         uniqueId = Util.getUUID( obj.getId() );
-                        finish();
-                        return;
+                    } else
+                    {
+                        name = "-" + InitialHandler.this.getName();
+                        onlineMode = false;
+						ImOffline = true;
                     }
-                    disconnect( bungee.getTranslation( "offline_mode_player" ) );
+                    finish();
+                    return;
+                    //disconnect( bungee.getTranslation( "offline_mode_player" ) );
                 } else
                 {
-                    disconnect( bungee.getTranslation( "mojang_fail" ) );
                     bungee.getLogger().log( Level.SEVERE, "Error authenticating " + getName() + " with minecraft.net", error );
+                    name = "-" + InitialHandler.this.getName();
+                    onlineMode = false;
+					ImOffline = true;
+                    finish();
+                    //disconnect( bungee.getTranslation( "mojang_fail" ) );
                 }
             }
         };
@@ -513,7 +545,7 @@ public class InitialHandler extends PacketHandler implements PendingConnection
 
     private void finish()
     {
-        offlineId = UUID.nameUUIDFromBytes( ( "OfflinePlayer:" + getName() ).getBytes( Charsets.UTF_8 ) );
+        offlineId = UUID.nameUUIDFromBytes( ( "OfflinePlayer:" + ( ImOffline ? getName().substring( 1 ) : getName() ) ).getBytes( Charsets.UTF_8 ) );
         if ( uniqueId == null )
         {
             uniqueId = offlineId;
