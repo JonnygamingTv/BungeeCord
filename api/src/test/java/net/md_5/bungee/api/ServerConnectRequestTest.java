@@ -50,6 +50,12 @@ public class ServerConnectRequestTest
         }
 
         @Override
+        public boolean isForward()
+        {
+            return false;
+        }
+
+        @Override
         public String getPermission()
         {
             return null;
