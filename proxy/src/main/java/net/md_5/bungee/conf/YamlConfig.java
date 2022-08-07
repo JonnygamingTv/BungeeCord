@@ -218,8 +218,9 @@ public class YamlConfig implements ConfigurationAdapter
             String addr = get( "address", "localhost:25565", val );
             String motd = ChatColor.translateAlternateColorCodes( '&', get( "motd", "&1Just another BungeeCord - Forced Host", val ) );
             boolean restricted = get( "restricted", false, val );
+            boolean ipForward = get( "ipForward", false, val );
             SocketAddress address = Util.getAddr( addr );
-            ServerInfo info = ProxyServer.getInstance().constructServerInfo( name, address, motd, restricted );
+            ServerInfo info = ProxyServer.getInstance().constructServerInfo( name, address, motd, restricted, ipForward );
             ret.put( name, info );
         }
 
