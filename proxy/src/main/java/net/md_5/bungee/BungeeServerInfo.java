@@ -35,7 +35,7 @@ import net.md_5.bungee.protocol.packet.PluginMessage;
 @RequiredArgsConstructor
 @ToString(of =
 {
-    "name", "socketAddress", "restricted"
+    "name", "socketAddress", "restricted", "ipForward"
 })
 // CHECKSTYLE:ON
 public class BungeeServerInfo implements ServerInfo
@@ -50,6 +50,8 @@ public class BungeeServerInfo implements ServerInfo
     private final String motd;
     @Getter
     private final boolean restricted;
+    @Getter
+    private final boolean ipForward;
     @Getter
     private final Queue<DefinedPacket> packetQueue = new LinkedList<>();
 
@@ -83,6 +85,12 @@ public class BungeeServerInfo implements ServerInfo
     {
         Preconditions.checkNotNull( player, "player" );
         return !restricted || player.hasPermission( getPermission() );
+    }
+
+    @Override
+    public boolean isForward()
+    {
+        return ipForward;
     }
 
     @Override
