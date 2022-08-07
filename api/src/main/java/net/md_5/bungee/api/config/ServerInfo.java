@@ -63,6 +63,14 @@ public interface ServerInfo
     boolean isRestricted();
 
     /**
+     * Whether this server should ipforward and
+     * forward
+     *
+     * @return if forward
+     */
+    boolean isForward();
+
+    /**
      * Get the permission required to access this server. Only enforced when the
      * server is restricted.
      *
