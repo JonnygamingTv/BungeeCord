@@ -679,13 +679,13 @@ public class BungeeCord extends ProxyServer
     }
 
     @Override
-    public ServerInfo constructServerInfo(String name, InetSocketAddress address, String motd, boolean restricted, boolean ipForward = false)
+    public ServerInfo constructServerInfo(String name, InetSocketAddress address, String motd, boolean restricted, boolean ipForward)
     {
         return constructServerInfo( name, (SocketAddress) address, motd, restricted, ipForward );
     }
 
     @Override
-    public ServerInfo constructServerInfo(String name, SocketAddress address, String motd, boolean restricted, boolean ipForward = false)
+    public ServerInfo constructServerInfo(String name, SocketAddress address, String motd, boolean restricted, boolean ipForward)
     {
         return new BungeeServerInfo( name, address, motd, restricted, ipForward );
     }
