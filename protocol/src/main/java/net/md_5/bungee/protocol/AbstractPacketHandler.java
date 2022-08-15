@@ -31,6 +31,7 @@ import net.md_5.bungee.protocol.packet.Respawn;
 import net.md_5.bungee.protocol.packet.ScoreboardDisplay;
 import net.md_5.bungee.protocol.packet.ScoreboardObjective;
 import net.md_5.bungee.protocol.packet.ScoreboardScore;
+import net.md_5.bungee.protocol.packet.ServerData;
 import net.md_5.bungee.protocol.packet.SetCompression;
 import net.md_5.bungee.protocol.packet.StatusRequest;
 import net.md_5.bungee.protocol.packet.StatusResponse;
@@ -211,6 +212,10 @@ public abstract class AbstractPacketHandler
     }
 
     public void handle(GameState gameState) throws Exception
+    {
+    }
+
+    public void handle(ServerData serverData) throws Exception
     {
     }
 }
