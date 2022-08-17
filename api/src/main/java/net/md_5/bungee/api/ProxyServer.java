@@ -207,7 +207,7 @@ public abstract class ProxyServer
      * @return the constructed instance
      */
     public abstract ServerInfo constructServerInfo(String name, InetSocketAddress address, String motd, boolean restricted, boolean ipForward);
-    
+
     /**
      * Factory method to construct an implementation specific server info
      * instance.
@@ -232,7 +232,7 @@ public abstract class ProxyServer
      * @return the constructed instance
      */
     public abstract ServerInfo constructServerInfo(String name, SocketAddress address, String motd, boolean restricted, boolean ipForward);
-    
+
     /**
      * Factory method to construct an implementation specific server info
      * instance.
