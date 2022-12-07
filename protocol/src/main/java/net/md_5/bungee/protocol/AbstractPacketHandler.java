@@ -26,6 +26,8 @@ import net.md_5.bungee.protocol.packet.PingPacket;
 import net.md_5.bungee.protocol.packet.PlayerChat;
 import net.md_5.bungee.protocol.packet.PlayerListHeaderFooter;
 import net.md_5.bungee.protocol.packet.PlayerListItem;
+import net.md_5.bungee.protocol.packet.PlayerListItemRemove;
+import net.md_5.bungee.protocol.packet.PlayerListItemUpdate;
 import net.md_5.bungee.protocol.packet.PluginMessage;
 import net.md_5.bungee.protocol.packet.Respawn;
 import net.md_5.bungee.protocol.packet.ScoreboardDisplay;
@@ -116,6 +118,14 @@ public abstract class AbstractPacketHandler
     }
 
     public void handle(PlayerListItem playerListItem) throws Exception
+    {
+    }
+
+    public void handle(PlayerListItemRemove playerListItem) throws Exception
+    {
+    }
+
+    public void handle(PlayerListItemUpdate playerListItem) throws Exception
     {
     }
 
