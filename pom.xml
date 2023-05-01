@@ -83,7 +83,7 @@
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-bom</artifactId>
-                <version>4.1.91.Final</version>
+                <version>4.1.92.Final</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -142,7 +142,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>3.2.1</version>
+                <version>3.2.2</version>
                 <executions>
                     <execution>
                         <phase>process-classes</phase>
@@ -183,6 +183,31 @@
                         <version>1.0</version>
                     </signature>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.3.0</version>
+                <executions>
+                    <execution>
+                        <id>enforce</id>
+                        <configuration>
+                            <rules>
+                                <dependencyConvergence>
+                                    <excludes>
+                                        <!-- org.apache.maven:maven-resolver-provider is inconsistent -->
+                                        <exclude>org.apache.commons:commons-lang3</exclude>
+                                        <!-- org.apache.maven:maven-resolver-transport-http is inconsistent -->
+                                        <exclude>org.apache.httpcomponents:httpcore</exclude>
+                                    </excludes>
+                                </dependencyConvergence>
+                            </rules>
+                        </configuration>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
