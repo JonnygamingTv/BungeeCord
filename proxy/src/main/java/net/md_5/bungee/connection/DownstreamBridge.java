@@ -31,6 +31,7 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
+import net.md_5.bungee.api.connection.Server;
 import net.md_5.bungee.api.event.PluginMessageEvent;
 import net.md_5.bungee.api.event.ServerConnectEvent;
 import net.md_5.bungee.api.event.ServerDisconnectEvent;
@@ -401,6 +402,27 @@ public class DownstreamBridge extends PacketHandler
                     }
                     break;
                 }
+                case "GetPlayerServer":
+                {
+                    String name = in.readUTF();
+                    ProxiedPlayer player = bungee.getPlayer( name );
+                    out.writeUTF( "GetPlayerServer" );
+                    out.writeUTF( name );
+                    if ( player == null )
+                    {
+                        out.writeUTF( "" );
+                        break;
+                    }
+                    Server srv = player.getServer();
+                    if ( srv == null )
+                    {
+                        out.writeUTF( "" );
+                    } else
+                    {
+                        out.writeUTF( srv.getInfo().getName() );
+                    }
+                    break;
+                }
                 case "IP":
                     out.writeUTF( "IP" );
                     if ( con.getSocketAddress() instanceof InetSocketAddress )
@@ -559,6 +581,16 @@ public class DownstreamBridge extends PacketHandler
                     {
                         String kickReason = in.readUTF();
                         player.disconnect( new TextComponent( kickReason ) );
+                    }
+                    break;
+                }
+                case "KickPlayerRaw":
+                {
+                    ProxiedPlayer player = bungee.getPlayer( in.readUTF() );
+                    if ( player != null )
+                    {
+                        BaseComponent[] kickReason = ComponentSerializer.parse( in.readUTF() );
+                        player.disconnect( kickReason );
                     }
                     break;
                 }
