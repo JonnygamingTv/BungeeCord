@@ -59,7 +59,6 @@ import net.md_5.bungee.protocol.packet.Handshake;
 import net.md_5.bungee.protocol.packet.Kick;
 import net.md_5.bungee.protocol.packet.LegacyHandshake;
 import net.md_5.bungee.protocol.packet.LegacyPing;
-import net.md_5.bungee.protocol.packet.LoginAcknowledged;
 import net.md_5.bungee.protocol.packet.LoginPayloadResponse;
 import net.md_5.bungee.protocol.packet.LoginRequest;
 import net.md_5.bungee.protocol.packet.LoginSuccess;
@@ -126,12 +125,12 @@ public class InitialHandler extends PacketHandler implements PendingConnection
     private enum State
     {
 
-        HANDSHAKE, STATUS, PING, USERNAME, ENCRYPT, FINISHING, CONFIGURING;
+        HANDSHAKE, STATUS, PING, USERNAME, ENCRYPT, FINISHING;
     }
 
     private boolean canSendKickMessage()
     {
-        return thisState == State.USERNAME || thisState == State.ENCRYPT || thisState == State.FINISHING || thisState == State.CONFIGURING;
+        return thisState == State.USERNAME || thisState == State.ENCRYPT || thisState == State.FINISHING;
     }
 
     @Override
@@ -630,15 +629,12 @@ public class InitialHandler extends PacketHandler implements PendingConnection
                             userCon = new UserConnection( bungee, ch, getName(), InitialHandler.this );
                             userCon.setCompressionThreshold( BungeeCord.getInstance().config.getCompressionThreshold() );
 
-                            unsafe.sendPacket( new LoginSuccess( getUniqueId(), getName(), ( loginProfile == null ) ? null : loginProfile.getProperties() ) );
-                            if ( getVersion() >= ProtocolConstants.MINECRAFT_1_20_2 )
+                            if ( getVersion() < ProtocolConstants.MINECRAFT_1_20_2 )
                             {
-                                thisState = State.CONFIGURING;
-                            } else
-                            {
+                                unsafe.sendPacket( new LoginSuccess( getUniqueId(), getName(), ( loginProfile == null ) ? null : loginProfile.getProperties() ) );
                                 ch.setProtocol( Protocol.GAME );
-                                finish2();
                             }
+                            finish2();
                         }
                     }
                 } );
@@ -647,15 +643,6 @@ public class InitialHandler extends PacketHandler implements PendingConnection
 
         // fire login event
         bungee.getPluginManager().callEvent( new LoginEvent( InitialHandler.this, complete ) );
-    }
-
-    @Override
-    public void handle(LoginAcknowledged loginAcknowledged) throws Exception
-    {
-        Preconditions.checkState( thisState == State.CONFIGURING, "Not expecting CONFIGURING" );
-
-        finish2();
-        ch.setEncodeProtocol( Protocol.CONFIGURATION );
     }
 
     private void finish2()
