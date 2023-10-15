@@ -68,7 +68,7 @@ public class Configuration implements ProxyConfig
     private int compressionThreshold = 256;
     private boolean preventProxyConnections;
     private boolean forgeSupport;
-    public String OfflinePlayerPrefix;
+    public String OfflinePlayerPrefix = "-";
 
     public void load()
     {
