@@ -458,7 +458,7 @@ public class InitialHandler extends PacketHandler implements PendingConnection
                             try
                             {
                                 Thread.sleep( 5000 );
-                                name = "-" + name;
+                                name = BungeeCord.getInstance().config.OfflinePlayerPrefix + name;
                                 ImOffline = true;
                                 onlineMode = false;
                                 thisState = InitialHandler.State.FINISHING;
@@ -523,7 +523,7 @@ public class InitialHandler extends PacketHandler implements PendingConnection
                         uniqueId = Util.getUUID( obj.getId() );
                     } else
                     {
-                        name = "-" + InitialHandler.this.getName();
+                        name = BungeeCord.getInstance().config.OfflinePlayerPrefix + InitialHandler.this.getName();
                         onlineMode = false;
                         ImOffline = true;
                     }
@@ -533,7 +533,7 @@ public class InitialHandler extends PacketHandler implements PendingConnection
                 } else
                 {
                     bungee.getLogger().log( Level.SEVERE, "Error authenticating " + getName() + " with minecraft.net", error );
-                    name = "-" + InitialHandler.this.getName();
+                    name = BungeeCord.getInstance().config.OfflinePlayerPrefix + InitialHandler.this.getName();
                     onlineMode = false;
                     ImOffline = true;
                     finish();
@@ -754,7 +754,7 @@ public class InitialHandler extends PacketHandler implements PendingConnection
     @Override
     public String getUUID()
     {
-        return uniqueId.toString().replace( "-", "" );
+        return uniqueId.toString().replace( BungeeCord.getInstance().config.OfflinePlayerPrefix, "" );
     }
 
     @Override
