@@ -8,6 +8,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 import java.lang.reflect.Type;
 import java.util.Set;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -44,16 +45,17 @@ public class ComponentSerializer implements JsonDeserializer<BaseComponent>
 
     /**
      * Parse a JSON-compliant String as an array of base components. The input
-     * can be one of either an array of components, or a single component object.
-     * If the input is an array, each component will be parsed individually and
-     * returned in the order that they were parsed. If the input is a single
-     * component object, a single-valued array with the component will be returned.
+     * can be one of either an array of components, or a single component
+     * object. If the input is an array, each component will be parsed
+     * individually and returned in the order that they were parsed. If the
+     * input is a single component object, a single-valued array with the
+     * component will be returned.
      * <p>
-     * <strong>NOTE:</strong> {@link #deserialize(String)} is preferred as it will
-     * parse only one component as opposed to an array of components which is non-
-     * standard behavior. This method is still appropriate for parsing multiple
-     * components at once, although such use case is rarely (if at all) exhibited
-     * in vanilla Minecraft.
+     * <strong>NOTE:</strong> {@link #deserialize(String)} is preferred as it
+     * will parse only one component as opposed to an array of components which
+     * is non- standard behavior. This method is still appropriate for parsing
+     * multiple components at once, although such use case is rarely (if at all)
+     * exhibited in vanilla Minecraft.
      *
      * @param json the component json to parse
      * @return an array of all parsed components
@@ -86,12 +88,41 @@ public class ComponentSerializer implements JsonDeserializer<BaseComponent>
     public static BaseComponent deserialize(String json)
     {
         JsonElement jsonElement = JsonParser.parseString( json );
+
+        return deserialize( jsonElement );
+    }
+
+    /**
+     * Deserialize a JSON element as a single component. The input is expected
+     * to be a JSON object that represents only one component.
+     *
+     * @param jsonElement the component json to parse
+     * @return the deserialized component
+     * @throws IllegalArgumentException if anything other than a JSON object is
+     * passed as input
+     */
+    public static BaseComponent deserialize(JsonElement jsonElement)
+    {
+        if ( jsonElement instanceof JsonPrimitive )
+        {
+            JsonPrimitive primitive = (JsonPrimitive) jsonElement;
+            if ( primitive.isString() )
+            {
+                return new TextComponent( primitive.getAsString() );
+            }
+        }
+
         if ( !jsonElement.isJsonObject() )
         {
-            throw new IllegalArgumentException( "Malformatted JSON. Expected object, got array for input \"" + json + "\"." );
+            throw new IllegalArgumentException( "Malformatted JSON. Expected object, got array for input \"" + jsonElement + "\"." );
         }
 
         return gson.fromJson( jsonElement, BaseComponent.class );
+    }
+
+    public static JsonElement toJson(BaseComponent component)
+    {
+        return gson.toJsonTree( component );
     }
 
     public static String toString(Object object)
