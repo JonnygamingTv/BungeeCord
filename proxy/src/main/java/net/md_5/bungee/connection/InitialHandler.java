@@ -1,6 +1,5 @@
 package net.md_5.bungee.connection;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.gson.Gson;
 import java.math.BigInteger;
@@ -546,7 +545,7 @@ public class InitialHandler extends PacketHandler implements PendingConnection
 
     private void finish()
     {
-        offlineId = UUID.nameUUIDFromBytes( ( "OfflinePlayer:" + ( ImOffline ? getName().substring( 1 ) : getName() ) ).getBytes( Charsets.UTF_8 ) );
+        offlineId = UUID.nameUUIDFromBytes( ( "OfflinePlayer:" + ( ImOffline ? getName().substring( 1 ) : getName() ) ).getBytes( StandardCharsets.UTF_8 ) );
         if ( uniqueId == null )
         {
             uniqueId = offlineId;
@@ -646,7 +645,11 @@ public class InitialHandler extends PacketHandler implements PendingConnection
 
     private void finish2()
     {
-        userCon.init();
+        if ( !userCon.init() )
+        {
+            disconnect( bungee.getTranslation( "already_connected_proxy" ) );
+            return;
+        }
 
         ch.getHandle().pipeline().get( HandlerBoss.class ).setHandler( new UpstreamBridge( bungee, userCon ) );
         bungee.getPluginManager().callEvent( new PostLoginEvent( userCon ) );
