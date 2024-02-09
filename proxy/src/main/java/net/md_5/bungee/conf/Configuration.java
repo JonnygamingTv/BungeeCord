@@ -105,12 +105,8 @@ public class Configuration implements ProxyConfig
         compressionThreshold = adapter.getInt( "network_compression_threshold", compressionThreshold );
         preventProxyConnections = adapter.getBoolean( "prevent_proxy_connections", preventProxyConnections );
         forgeSupport = adapter.getBoolean( "forge_support", forgeSupport );
-<<<<<<< HEAD
-        OfflinePlayerPrefix = adapter.getString( "OfflinePlayerPrefix", OfflinePlayerPrefix );
-=======
         rejectTransfers = adapter.getBoolean( "reject_transfers", rejectTransfers );
->>>>>>> eda268b4810e19df2fe60cbe25ba81b29f7add43
-
+        OfflinePlayerPrefix = adapter.getString( "OfflinePlayerPrefix", OfflinePlayerPrefix );
         disabledCommands = new CaseInsensitiveSet( (Collection<String>) adapter.getList( "disabled_commands", Arrays.asList( "disabledcommandhere" ) ) );
 
         Preconditions.checkArgument( listeners != null && !listeners.isEmpty(), "No listeners defined." );
