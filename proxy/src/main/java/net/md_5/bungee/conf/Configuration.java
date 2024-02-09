@@ -68,6 +68,7 @@ public class Configuration implements ProxyConfig
     private int compressionThreshold = 256;
     private boolean preventProxyConnections;
     private boolean forgeSupport;
+    private boolean rejectTransfers;
     public String OfflinePlayerPrefix = "-";
 
     public void load()
@@ -104,7 +105,11 @@ public class Configuration implements ProxyConfig
         compressionThreshold = adapter.getInt( "network_compression_threshold", compressionThreshold );
         preventProxyConnections = adapter.getBoolean( "prevent_proxy_connections", preventProxyConnections );
         forgeSupport = adapter.getBoolean( "forge_support", forgeSupport );
+<<<<<<< HEAD
         OfflinePlayerPrefix = adapter.getString( "OfflinePlayerPrefix", OfflinePlayerPrefix );
+=======
+        rejectTransfers = adapter.getBoolean( "reject_transfers", rejectTransfers );
+>>>>>>> eda268b4810e19df2fe60cbe25ba81b29f7add43
 
         disabledCommands = new CaseInsensitiveSet( (Collection<String>) adapter.getList( "disabled_commands", Arrays.asList( "disabledcommandhere" ) ) );
 

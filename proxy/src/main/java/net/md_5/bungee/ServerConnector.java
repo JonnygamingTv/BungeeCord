@@ -10,6 +10,7 @@ import java.util.Locale;
 import java.util.Queue;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Level;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.api.ChatColor;
@@ -243,7 +244,7 @@ public class ServerConnector extends PacketHandler
             // Set tab list size, TODO: what shall we do about packet mutability
             Login modLogin = new Login( login.getEntityId(), login.isHardcore(), login.getGameMode(), login.getPreviousGameMode(), login.getWorldNames(), login.getDimensions(), login.getDimension(), login.getWorldName(), login.getSeed(), login.getDifficulty(),
                     (byte) user.getPendingConnection().getListener().getTabListSize(), login.getLevelType(), login.getViewDistance(), login.getSimulationDistance(), login.isReducedDebugInfo(), login.isNormalRespawn(), login.isLimitedCrafting(), login.isDebug(), login.isFlat(), login.getDeathLocation(),
-                    login.getPortalCooldown() );
+                    login.getPortalCooldown(), login.isSecureProfile() );
 
             user.unsafe().sendPacket( modLogin );
 
@@ -339,6 +340,14 @@ public class ServerConnector extends PacketHandler
 
     private void cutThrough(ServerConnection server)
     {
+        // TODO: Fix this?
+        if ( !user.isActive() )
+        {
+            server.disconnect( "Quitting" );
+            bungee.getLogger().log( Level.WARNING, "[{0}] No client connected for pending server!", user );
+            return;
+        }
+
         if ( user.getPendingConnection().getVersion() >= ProtocolConstants.MINECRAFT_1_20_2 )
         {
             if ( user.getServer() != null )
@@ -358,15 +367,6 @@ public class ServerConnector extends PacketHandler
         {
             user.getServer().setObsolete( true );
             user.getServer().disconnect( "Quitting" );
-        }
-
-        // TODO: Fix this?
-        if ( !user.isActive() )
-        {
-            server.disconnect( "Quitting" );
-            // Silly server admins see stack trace and die
-            bungee.getLogger().warning( "No client connected for pending server!" );
-            return;
         }
 
         // Add to new server
