@@ -733,7 +733,7 @@ public class BungeeCord extends ProxyServer
     @Override
     public ServerInfo constructServerInfo(String name, SocketAddress address, String motd, boolean restricted)
     {
-        return new BungeeServerInfo( name, address, motd, restricted, false );
+        return new BungeeServerInfo( name, address, motd, restricted, BungeeCord.getInstance().config.isIpForward() );
     }
 
     @Override
