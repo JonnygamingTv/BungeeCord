@@ -66,6 +66,7 @@ import net.md_5.bungee.protocol.packet.Handshake;
 import net.md_5.bungee.protocol.packet.Kick;
 import net.md_5.bungee.protocol.packet.LegacyHandshake;
 import net.md_5.bungee.protocol.packet.LegacyPing;
+import net.md_5.bungee.protocol.packet.LoginAcknowledged;
 import net.md_5.bungee.protocol.packet.LoginPayloadResponse;
 import net.md_5.bungee.protocol.packet.LoginRequest;
 import net.md_5.bungee.protocol.packet.LoginSuccess;
@@ -612,34 +613,24 @@ public class InitialHandler extends PacketHandler implements PendingConnection
             }
         }
 
+        ProxiedPlayer oldName = bungee.getPlayer( getName() );
+        if ( oldName != null )
+        {
+            // TODO See #1218
+            disconnect( bungee.getTranslation( "already_connected_proxy" ) );
+            return;
+        }
+
         if ( isOnlineMode() )
         {
-            // Check for multiple connections
-            // We have to check for the old name first
-            ProxiedPlayer oldName = bungee.getPlayer( getName() );
-            if ( oldName != null )
-            {
-                // TODO See #1218
-                disconnect( bungee.getTranslation( "already_connected_proxy" ) );
-            }
             // And then also for their old UUID
             ProxiedPlayer oldID = bungee.getPlayer( getUniqueId() );
             if ( oldID != null )
             {
                 // TODO See #1218
                 disconnect( bungee.getTranslation( "already_connected_proxy" ) );
-            }
-        } else
-        {
-            // In offline mode the existing user stays and we kick the new one
-            ProxiedPlayer oldName = bungee.getPlayer( getName() );
-            if ( oldName != null )
-            {
-                // TODO See #1218
-                disconnect( bungee.getTranslation( "already_connected_proxy" ) );
                 return;
             }
-
         }
 
         Callback<LoginEvent> complete = new Callback<LoginEvent>()
@@ -733,6 +724,13 @@ public class InitialHandler extends PacketHandler implements PendingConnection
     }
 
     @Override
+    public void handle(LoginAcknowledged loginAcknowledged) throws Exception
+    {
+        // this packet should only be sent after the login success (it should be handled in the UpstreamBridge)
+        disconnect( "Unexpected LoginAcknowledged" );
+    }
+
+    @Override
     public void handle(CookieResponse cookieResponse)
     {
         // be careful, backend server could also make the client send a cookie response
@@ -758,6 +756,10 @@ public class InitialHandler extends PacketHandler implements PendingConnection
 
             throw CancelSendSignal.INSTANCE;
         }
+
+        // if there is no userCon we can't have a connection to a backend server that could have requested this cookie
+        // which means that this cookie is invalid as the proxy also has not requested it
+        Preconditions.checkState( userCon != null, "not requested cookie received" );
     }
 
     @Override
