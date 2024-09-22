@@ -199,6 +199,7 @@ public class InitialHandler extends PacketHandler implements PendingConnection
     @Override
     public void handle(LegacyHandshake legacyHandshake) throws Exception
     {
+        Preconditions.checkState( !this.legacy, "Not expecting LegacyHandshake" );
         this.legacy = true;
         ch.close( bungee.getTranslation( "outdated_client", bungee.getGameVersion() ) );
     }
@@ -206,6 +207,7 @@ public class InitialHandler extends PacketHandler implements PendingConnection
     @Override
     public void handle(LegacyPing ping) throws Exception
     {
+        Preconditions.checkState( !this.legacy, "Not expecting LegacyPing" );
         this.legacy = true;
         final boolean v1_5 = ping.isV1_5();
 
@@ -345,7 +347,7 @@ public class InitialHandler extends PacketHandler implements PendingConnection
     @Override
     public void handle(Handshake handshake) throws Exception
     {
-        Preconditions.checkState( thisState == State.HANDSHAKE, "Not expecting HANDSHAKE" );
+        Preconditions.checkState( thisState == State.HANDSHAKE && !this.legacy, "Not expecting HANDSHAKE" );
         this.handshake = handshake;
         ch.setVersion( handshake.getProtocolVersion() );
         ch.getHandle().pipeline().remove( PipelineUtils.LEGACY_KICKER );
@@ -423,7 +425,7 @@ public class InitialHandler extends PacketHandler implements PendingConnection
     @Override
     public void handle(LoginRequest loginRequest) throws Exception
     {
-        Preconditions.checkState( thisState == State.USERNAME, "Not expecting USERNAME" );
+        Preconditions.checkState( thisState == State.USERNAME && this.loginRequest == null, "Not expecting USERNAME" );
 
         if ( !AllowedCharacters.isValidName( loginRequest.getData(), onlineMode ) )
         {
