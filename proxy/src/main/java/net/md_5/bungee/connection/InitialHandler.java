@@ -814,6 +814,12 @@ public class InitialHandler extends PacketHandler implements PendingConnection
     }
 
     @Override
+    public void setName(String N)
+    {
+        name = N;
+    }
+
+    @Override
     public int getVersion()
     {
         return ( handshake == null ) ? -1 : handshake.getProtocolVersion();
@@ -842,6 +848,12 @@ public class InitialHandler extends PacketHandler implements PendingConnection
     {
         Preconditions.checkState( thisState == State.USERNAME, "Can only set online mode status whilst state is username" );
         this.onlineMode = onlineMode;
+        if ( !onlineMode )
+        {
+            String currName = InitialHandler.this.getName();
+            if ( !currName.substring( 0, 1 ).contentEquals( BungeeCord.getInstance().config.OfflinePlayerPrefix ) )
+                name = BungeeCord.getInstance().config.OfflinePlayerPrefix + currName;
+        }
     }
 
     @Override
