@@ -72,7 +72,6 @@ public class Configuration implements ProxyConfig
     public String OfflinePlayerPrefix = "-";
     private int maxPacketsPerSecond = 1 << 12;
     private int maxPacketDataPerSecond = 1 << 25;
->>>>>>> f797bd488ff3624c275db6582988d3ddbf31efe1
 
     public void load()
     {
