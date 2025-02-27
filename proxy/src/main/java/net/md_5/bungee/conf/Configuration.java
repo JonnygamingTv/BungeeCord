@@ -70,6 +70,9 @@ public class Configuration implements ProxyConfig
     private boolean forgeSupport;
     private boolean rejectTransfers;
     public String OfflinePlayerPrefix = "-";
+    private int maxPacketsPerSecond = 1 << 12;
+    private int maxPacketDataPerSecond = 1 << 25;
+>>>>>>> f797bd488ff3624c275db6582988d3ddbf31efe1
 
     public void load()
     {
@@ -107,6 +110,11 @@ public class Configuration implements ProxyConfig
         forgeSupport = adapter.getBoolean( "forge_support", forgeSupport );
         rejectTransfers = adapter.getBoolean( "reject_transfers", rejectTransfers );
         OfflinePlayerPrefix = adapter.getString( "OfflinePlayerPrefix", OfflinePlayerPrefix );
+
+        maxPacketsPerSecond = adapter.getInt( "max_packets_per_second", maxPacketsPerSecond );
+        maxPacketDataPerSecond = adapter.getInt( "max_packets_data_per_second", maxPacketDataPerSecond );
+
+
         disabledCommands = new CaseInsensitiveSet( (Collection<String>) adapter.getList( "disabled_commands", Arrays.asList( "disabledcommandhere" ) ) );
 
         Preconditions.checkArgument( listeners != null && !listeners.isEmpty(), "No listeners defined." );

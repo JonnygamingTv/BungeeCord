@@ -529,7 +529,7 @@ public class InitialHandler extends PacketHandler implements PendingConnection
         BungeeCipher decrypt = EncryptionUtil.getCipher( false, sharedKey );
         ch.addBefore( PipelineUtils.FRAME_DECODER, PipelineUtils.DECRYPT_HANDLER, new CipherDecoder( decrypt ) );
         BungeeCipher encrypt = EncryptionUtil.getCipher( true, sharedKey );
-        ch.addBefore( PipelineUtils.FRAME_PREPENDER, PipelineUtils.ENCRYPT_HANDLER, new CipherEncoder( encrypt ) );
+        ch.addBefore( PipelineUtils.FRAME_PREPENDER_AND_COMPRESS, PipelineUtils.ENCRYPT_HANDLER, new CipherEncoder( encrypt ) );
         // disable use of composite buffers if we use natives
         ch.updateComposite();
 
@@ -943,19 +943,25 @@ public class InitialHandler extends PacketHandler implements PendingConnection
     // otherwise netty will schedule any pipeline related call by itself, this decreases performance
     private <T> Callback<T> eventLoopCallback(Callback<T> callback)
     {
-        EventLoop eventLoop = ch.getHandle().eventLoop();
-        return eventLoop.inEventLoop() ? (result, error) ->
+        return (result, error) ->
         {
-            if ( !ch.isClosing() )
+            EventLoop eventLoop = ch.getHandle().eventLoop();
+            if ( eventLoop.inEventLoop() )
             {
-                callback.done( result, error );
+                if ( !ch.isClosing() )
+                {
+                    callback.done( result, error );
+                }
+                return;
             }
-        } : (result, error) -> eventLoop.execute( () ->
-        {
-            if ( !ch.isClosing() )
+
+            eventLoop.execute( () ->
             {
-                callback.done( result, error );
-            }
-        } );
+                if ( !ch.isClosing() )
+                {
+                    callback.done( result, error );
+                }
+            } );
+        };
     }
 }
