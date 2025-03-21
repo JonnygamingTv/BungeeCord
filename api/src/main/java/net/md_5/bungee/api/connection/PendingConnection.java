@@ -85,6 +85,13 @@ public interface PendingConnection extends Connection
     void setOnlineMode(boolean onlineMode);
 
     /**
+     * Set/change the username for the player.
+     *
+     * @param N Username
+     */
+    void setName(String N);
+
+    /**
      * Check if the client is using the older unsupported Minecraft protocol
      * used by Minecraft clients older than 1.7.
      *
