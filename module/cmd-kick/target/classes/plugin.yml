@@ -1,0 +1,5 @@
+name: cmd_kick
+main: net.md_5.bungee.module.cmd.kick.PluginKick
+version: git:cmd_kick:1.21-R0.1-SNAPSHOT:fd3c60c:unknown
+description: Provides the gkick command
+author: SpigotMC
