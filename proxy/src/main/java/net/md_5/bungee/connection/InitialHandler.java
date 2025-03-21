@@ -122,6 +122,12 @@ public class InitialHandler extends PacketHandler implements PendingConnection
         {
             ch.write( packet );
         }
+
+        @Override
+        public void sendPacketQueued(DefinedPacket packet)
+        {
+            throw new UnsupportedOperationException( "Not supported" );
+        }
     };
     private Thread thr;
     @Getter
