@@ -1,0 +1,5 @@
+name: reconnect_yaml
+main: net.md_5.bungee.module.reconnect.yaml.PluginYaml
+version: git:reconnect_yaml:1.21-R0.1-SNAPSHOT:fd3c60c:unknown
+description: Provides reconnect location functionality in locations.yml
+author: SpigotMC
