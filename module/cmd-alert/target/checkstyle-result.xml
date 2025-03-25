@@ -1,3 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <checkstyle version="8.45.1">
+<file name="D:\downloads\Bungee_git\module\cmd-alert\src\main\java\net\md_5\bungee\module\cmd\alert\CommandAlert.java">
+</file>
+<file name="D:\downloads\Bungee_git\module\cmd-alert\src\main\java\net\md_5\bungee\module\cmd\alert\CommandAlertRaw.java">
+</file>
+<file name="D:\downloads\Bungee_git\module\cmd-alert\src\main\java\net\md_5\bungee\module\cmd\alert\PluginAlert.java">
+</file>
 </checkstyle>
