@@ -25,6 +25,7 @@ import net.md_5.bungee.api.score.Objective;
 import net.md_5.bungee.api.score.Score;
 import net.md_5.bungee.api.score.Scoreboard;
 import net.md_5.bungee.api.score.Team;
+import net.md_5.bungee.chat.ComponentSerializer;
 import net.md_5.bungee.connection.CancelSendSignal;
 import net.md_5.bungee.connection.DownstreamBridge;
 import net.md_5.bungee.connection.LoginResult;
@@ -35,10 +36,10 @@ import net.md_5.bungee.netty.ChannelWrapper;
 import net.md_5.bungee.netty.HandlerBoss;
 import net.md_5.bungee.netty.PacketHandler;
 import net.md_5.bungee.protocol.DefinedPacket;
+import net.md_5.bungee.protocol.Either;
 import net.md_5.bungee.protocol.PacketWrapper;
 import net.md_5.bungee.protocol.Protocol;
 import net.md_5.bungee.protocol.ProtocolConstants;
-import net.md_5.bungee.protocol.packet.BundleDelimiter;
 import net.md_5.bungee.protocol.packet.CookieRequest;
 import net.md_5.bungee.protocol.packet.CookieResponse;
 import net.md_5.bungee.protocol.packet.EncryptionRequest;
@@ -59,7 +60,6 @@ import net.md_5.bungee.protocol.packet.ScoreboardScoreReset;
 import net.md_5.bungee.protocol.packet.SetCompression;
 import net.md_5.bungee.protocol.packet.StartConfiguration;
 import net.md_5.bungee.protocol.packet.ViewDistance;
-import net.md_5.bungee.protocol.util.Either;
 import net.md_5.bungee.util.AddressUtil;
 import net.md_5.bungee.util.BufUtil;
 import net.md_5.bungee.util.QuietException;
@@ -111,14 +111,14 @@ public class ServerConnector extends PacketHandler
         Handshake originalHandshake = user.getPendingConnection().getHandshake();
         Handshake copiedHandshake = new Handshake( originalHandshake.getProtocolVersion(), originalHandshake.getHost(), originalHandshake.getPort(), 2 );
 
-        if ( BungeeCord.getInstance().config.isIpForward() && user.getSocketAddress() instanceof InetSocketAddress )
+        if ( ( target.isForward() ) && user.getSocketAddress() instanceof InetSocketAddress )
         {
             String newHost = copiedHandshake.getHost() + "\00" + AddressUtil.sanitizeAddress( user.getAddress() ) + "\00" + user.getUUID();
 
             LoginResult profile = user.getPendingConnection().getLoginProfile();
             if ( profile != null && profile.getProperties() != null && profile.getProperties().length > 0 )
             {
-                newHost += "\00" + LoginResult.GSON.toJson( profile.getProperties() );
+                newHost += "\00" + BungeeCord.getInstance().gson.toJson( profile.getProperties() );
             }
             copiedHandshake.setHost( newHost );
         } else if ( !user.getExtraDataInHandshake().isEmpty() )
@@ -221,11 +221,7 @@ public class ServerConnector extends PacketHandler
         ServerConnectedEvent event = new ServerConnectedEvent( user, server );
         bungee.getPluginManager().callEvent( event );
 
-        // Already sent after config start
-        if ( user.getPendingConnection().getVersion() < ProtocolConstants.MINECRAFT_1_20_2 )
-        {
-            ch.write( BungeeCord.getInstance().registerChannels( user.getPendingConnection().getVersion() ) );
-        }
+        ch.write( BungeeCord.getInstance().registerChannels( user.getPendingConnection().getVersion() ) );
         Queue<DefinedPacket> packetQueue = target.getPacketQueue();
         synchronized ( packetQueue )
         {
@@ -306,7 +302,7 @@ public class ServerConnector extends PacketHandler
             {
                 user.unsafe().sendPacket( new ScoreboardObjective(
                         objective.getName(),
-                        ( user.getPendingConnection().getVersion() >= ProtocolConstants.MINECRAFT_1_13 ) ? Either.right( user.getChatSerializer().deserialize( objective.getValue() ) ) : Either.left( objective.getValue() ),
+                        ( user.getPendingConnection().getVersion() >= ProtocolConstants.MINECRAFT_1_13 ) ? Either.right( ComponentSerializer.deserialize( objective.getValue() ) ) : Either.left( objective.getValue() ),
                         ScoreboardObjective.HealthDisplay.fromString( objective.getType() ),
                         (byte) 1, null )
                 );
@@ -374,13 +370,9 @@ public class ServerConnector extends PacketHandler
         {
             if ( user.getServer() != null )
             {
+                // Begin config mode
                 if ( user.getCh().getEncodeProtocol() != Protocol.CONFIGURATION )
                 {
-                    if ( user.isBundling() )
-                    {
-                        user.toggleBundling();
-                        user.unsafe().sendPacket( new BundleDelimiter() );
-                    }
                     user.unsafe().sendPacket( new StartConfiguration() );
                 }
             } else
