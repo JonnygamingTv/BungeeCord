@@ -2,7 +2,7 @@ package net.md_5.bungee.connection;
 
 import com.google.common.base.Preconditions;
 import com.google.gson.Gson;
-import io.netty.buffer.Unpooled;
+import io.netty.channel.EventLoop;
 import java.math.BigInteger;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -58,9 +58,9 @@ import net.md_5.bungee.netty.cipher.CipherDecoder;
 import net.md_5.bungee.netty.cipher.CipherEncoder;
 import net.md_5.bungee.protocol.DefinedPacket;
 import net.md_5.bungee.protocol.PacketWrapper;
+import net.md_5.bungee.protocol.PlayerPublicKey;
 import net.md_5.bungee.protocol.Protocol;
 import net.md_5.bungee.protocol.ProtocolConstants;
-import net.md_5.bungee.protocol.data.PlayerPublicKey;
 import net.md_5.bungee.protocol.packet.CookieRequest;
 import net.md_5.bungee.protocol.packet.CookieResponse;
 import net.md_5.bungee.protocol.packet.EncryptionRequest;
@@ -98,8 +98,6 @@ public class InitialHandler extends PacketHandler implements PendingConnection
     @Getter
     private PluginMessage brandMessage;
     @Getter
-    private String clientBrand;
-    @Getter
     private final Set<String> registeredChannels = new HashSet<>();
     private State thisState = State.HANDSHAKE;
     private int loginPayloadId;
@@ -131,6 +129,7 @@ public class InitialHandler extends PacketHandler implements PendingConnection
             throw new UnsupportedOperationException( "Not supported" );
         }
     };
+    private Thread thr;
     @Getter
     private boolean onlineMode = BungeeCord.getInstance().config.isOnlineMode();
     @Getter
@@ -146,6 +145,8 @@ public class InitialHandler extends PacketHandler implements PendingConnection
     private LoginResult loginProfile;
     @Getter
     private boolean legacy;
+    @Getter
+    private boolean ImOffline;
     @Getter
     private String extraDataInHandshake = "";
     @Getter
@@ -286,7 +287,6 @@ public class InitialHandler extends PacketHandler implements PendingConnection
     public void handle(StatusRequest statusRequest) throws Exception
     {
         Preconditions.checkState( thisState == State.STATUS, "Not expecting STATUS" );
-        thisState = null; // don't accept multiple status requests and set state to ping in async event callback
 
         ServerInfo forced = AbstractReconnectHandler.getForcedHost( this );
         final String motd = ( forced != null ) ? forced.getMotd() : listener.getMotd();
@@ -308,9 +308,12 @@ public class InitialHandler extends PacketHandler implements PendingConnection
                     @Override
                     public void done(ProxyPingEvent pingResult, Throwable error)
                     {
-                        Gson gson = PingHandler.gson;
+                        Gson gson = BungeeCord.getInstance().gson;
                         unsafe.sendPacket( new StatusResponse( gson.toJson( pingResult.getResponse() ) ) );
-                        thisState = State.PING;
+                        if ( bungee.getConnectionThrottle() != null )
+                        {
+                            bungee.getConnectionThrottle().unthrottle( getSocketAddress() );
+                        }
                     }
                 };
 
@@ -325,6 +328,8 @@ public class InitialHandler extends PacketHandler implements PendingConnection
         {
             pingBack.done( getPingInfo( motd, protocol ), null );
         }
+
+        thisState = State.PING;
     }
 
     @Override
@@ -333,10 +338,6 @@ public class InitialHandler extends PacketHandler implements PendingConnection
         Preconditions.checkState( thisState == State.PING, "Not expecting PING" );
         unsafe.sendPacket( ping );
         disconnect( "" );
-        if ( bungee.getConnectionThrottle() != null )
-        {
-            bungee.getConnectionThrottle().unthrottle( getSocketAddress() );
-        }
     }
 
     @Override
@@ -486,6 +487,26 @@ public class InitialHandler extends PacketHandler implements PendingConnection
                 {
                     thisState = State.ENCRYPT;
                     unsafe().sendPacket( request = EncryptionUtil.encryptRequest() );
+                    name = getName();
+                    thr = new Thread()
+                    {
+                        @Override
+                        public void run()
+                        {
+                            try
+                            {
+                                Thread.sleep( 5000 );
+                                name = BungeeCord.getInstance().config.OfflinePlayerPrefix + name;
+                                ImOffline = true;
+                                onlineMode = false;
+                                thisState = InitialHandler.State.FINISHING;
+                                finish();
+                            } catch ( InterruptedException ex )
+                            {
+                            }
+                        }
+                    };
+                    thr.start();
                 } else
                 {
                     thisState = State.FINISHING;
@@ -523,10 +544,10 @@ public class InitialHandler extends PacketHandler implements PendingConnection
             sha.update( bit );
         }
         String encodedHash = URLEncoder.encode( new BigInteger( sha.digest() ).toString( 16 ), "UTF-8" );
-
         String preventProxy = ( BungeeCord.getInstance().config.isPreventProxyConnections() && getSocketAddress() instanceof InetSocketAddress ) ? "&ip=" + URLEncoder.encode( getAddress().getAddress().getHostAddress(), "UTF-8" ) : "";
         String authURL = "https://sessionserver.mojang.com/session/minecraft/hasJoined?username=" + encName + "&serverId=" + encodedHash + preventProxy;
-
+        thr.interrupt();
+        //bungee.getLogger().log( Level.INFO, getName() + " is authenticating", "auth" );
         Callback<String> handler = new Callback<String>()
         {
             @Override
@@ -534,20 +555,29 @@ public class InitialHandler extends PacketHandler implements PendingConnection
             {
                 if ( error == null )
                 {
-                    LoginResult obj = LoginResult.GSON.fromJson( result, LoginResult.class );
+                    LoginResult obj = BungeeCord.getInstance().gson.fromJson( result, LoginResult.class );
                     if ( obj != null && obj.getId() != null )
                     {
                         loginProfile = obj;
                         name = obj.getName();
                         uniqueId = Util.getUUID( obj.getId() );
-                        finish();
-                        return;
+                    } else
+                    {
+                        name = BungeeCord.getInstance().config.OfflinePlayerPrefix + InitialHandler.this.getName();
+                        onlineMode = false;
+                        ImOffline = true;
                     }
-                    disconnect( bungee.getTranslation( "offline_mode_player" ) );
+                    finish();
+                    return;
+                    //disconnect( bungee.getTranslation( "offline_mode_player" ) );
                 } else
                 {
-                    disconnect( bungee.getTranslation( "mojang_fail" ) );
                     bungee.getLogger().log( Level.SEVERE, "Error authenticating " + getName() + " with minecraft.net", error );
+                    name = BungeeCord.getInstance().config.OfflinePlayerPrefix + InitialHandler.this.getName();
+                    onlineMode = false;
+                    ImOffline = true;
+                    finish();
+                    //disconnect( bungee.getTranslation( "mojang_fail" ) );
                 }
             }
         };
@@ -557,7 +587,7 @@ public class InitialHandler extends PacketHandler implements PendingConnection
 
     private void finish()
     {
-        offlineId = UUID.nameUUIDFromBytes( ( "OfflinePlayer:" + getName() ).getBytes( StandardCharsets.UTF_8 ) );
+        offlineId = UUID.nameUUIDFromBytes( ( "OfflinePlayer:" + ( ImOffline ? getName().substring( 1 ) : getName() ) ).getBytes( StandardCharsets.UTF_8 ) );
         if ( uniqueId == null )
         {
             uniqueId = offlineId;
@@ -759,6 +789,12 @@ public class InitialHandler extends PacketHandler implements PendingConnection
     }
 
     @Override
+    public void setName(String N)
+    {
+        name = N;
+    }
+
+    @Override
     public int getVersion()
     {
         return ( handshake == null ) ? -1 : handshake.getProtocolVersion();
@@ -787,6 +823,12 @@ public class InitialHandler extends PacketHandler implements PendingConnection
     {
         Preconditions.checkState( thisState == State.USERNAME, "Can only set online mode status whilst state is username" );
         this.onlineMode = onlineMode;
+        if ( !onlineMode )
+        {
+            String currName = InitialHandler.this.getName();
+            if ( !currName.substring( 0, 1 ).contentEquals( BungeeCord.getInstance().config.OfflinePlayerPrefix ) )
+                name = BungeeCord.getInstance().config.OfflinePlayerPrefix + currName;
+        }
     }
 
     @Override
@@ -800,7 +842,7 @@ public class InitialHandler extends PacketHandler implements PendingConnection
     @Override
     public String getUUID()
     {
-        return uniqueId.toString().replace( "-", "" );
+        return uniqueId.toString().replace( BungeeCord.getInstance().config.OfflinePlayerPrefix, "" );
     }
 
     @Override
@@ -852,7 +894,6 @@ public class InitialHandler extends PacketHandler implements PendingConnection
         } else if ( input.getTag().equals( "MC|Brand" ) || input.getTag().equals( "minecraft:brand" ) )
         {
             brandMessage = input;
-            clientBrand = DefinedPacket.readString( Unpooled.wrappedBuffer( input.getData() ) );
         }
     }
 
@@ -904,7 +945,17 @@ public class InitialHandler extends PacketHandler implements PendingConnection
     {
         return (result, error) ->
         {
-            ch.scheduleIfNecessary( () ->
+            EventLoop eventLoop = ch.getHandle().eventLoop();
+            if ( eventLoop.inEventLoop() )
+            {
+                if ( !ch.isClosing() )
+                {
+                    callback.done( result, error );
+                }
+                return;
+            }
+
+            eventLoop.execute( () ->
             {
                 if ( !ch.isClosing() )
                 {
