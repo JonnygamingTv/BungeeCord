@@ -87,10 +87,8 @@ public interface Connection
 
         /**
          * Queue a packet to this connection.
-         *
-         * If the packet is not registered for the connections current encoder
-         * protocol, it will be queued until it is, otherwise it will be sent
-         * immediately.
+         * If the packet is not registered for the connections current encoder protocol, it will be queued until it is,
+         * otherwise it will be sent immediately.
          *
          * @param packet the packet to be queued
          * @throws UnsupportedOperationException if used for a PendingConnection
