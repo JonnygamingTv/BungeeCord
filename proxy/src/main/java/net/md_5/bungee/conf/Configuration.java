@@ -1,6 +1,7 @@
 package net.md_5.bungee.conf;
 
 import com.google.common.base.Preconditions;
+import gnu.trove.map.TMap;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -41,7 +42,7 @@ public class Configuration implements ProxyConfig
     /**
      * Set of all servers.
      */
-    private Map<String, ServerInfo> servers;
+    private TMap<String, ServerInfo> servers;
     /**
      * Should we check minecraft.net auth.
      */
@@ -55,21 +56,22 @@ public class Configuration implements ProxyConfig
      */
     private boolean logCommands;
     private boolean logPings = true;
+    private boolean ipForward;
+    private boolean preventProxyConnections;
+    private boolean forgeSupport;
+    private boolean rejectTransfers;
     private int remotePingCache = -1;
     private int playerLimit = -1;
-    private Collection<String> disabledCommands;
     private int serverConnectTimeout = 5000;
     private int remotePingTimeout = 5000;
     private int throttle = 4000;
     private int throttleLimit = 3;
-    private boolean ipForward;
-    private Favicon favicon;
     private int compressionThreshold = 256;
-    private boolean preventProxyConnections;
-    private boolean forgeSupport;
-    private boolean rejectTransfers;
     private int maxPacketsPerSecond = 1 << 12;
     private int maxPacketDataPerSecond = 1 << 25;
+    private Favicon favicon;
+    public String OfflinePlayerPrefix = "-";
+    private Collection<String> disabledCommands;
 
     public void load()
     {
@@ -106,6 +108,9 @@ public class Configuration implements ProxyConfig
         preventProxyConnections = adapter.getBoolean( "prevent_proxy_connections", preventProxyConnections );
         forgeSupport = adapter.getBoolean( "forge_support", forgeSupport );
         rejectTransfers = adapter.getBoolean( "reject_transfers", rejectTransfers );
+
+        OfflinePlayerPrefix = adapter.getString( "OfflinePlayerPrefix", OfflinePlayerPrefix );
+
         maxPacketsPerSecond = adapter.getInt( "max_packets_per_second", maxPacketsPerSecond );
         maxPacketDataPerSecond = adapter.getInt( "max_packets_data_per_second", maxPacketDataPerSecond );
 
