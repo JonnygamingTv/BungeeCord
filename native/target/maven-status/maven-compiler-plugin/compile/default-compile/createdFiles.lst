@@ -1,0 +1,12 @@
+net\md_5\bungee\jni\zlib\JavaZlib.class
+net\md_5\bungee\jni\cipher\JavaCipher$1.class
+net\md_5\bungee\jni\NativeCode.class
+net\md_5\bungee\jni\cipher\JavaCipher.class
+net\md_5\bungee\jni\cipher\BungeeCipher.class
+net\md_5\bungee\jni\cipher\JavaCipher$EmptyByteThreadLocal.class
+net\md_5\bungee\jni\zlib\BungeeZlib.class
+net\md_5\bungee\jni\cipher\NativeCipherImpl.class
+net\md_5\bungee\jni\zlib\NativeZlib.class
+net\md_5\bungee\jni\NativeCodeException.class
+net\md_5\bungee\jni\zlib\NativeCompressImpl.class
+net\md_5\bungee\jni\cipher\NativeCipher.class

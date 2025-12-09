@@ -1,0 +1,7 @@
+net\md_5\bungee\log\BungeeLogger.class
+net\md_5\bungee\log\ColouredWriter.class
+net\md_5\bungee\log\ConciseFormatter.class
+net\md_5\bungee\log\ColouredWriter$ReplacementSpecification.class
+net\md_5\bungee\log\LoggingOutputStream.class
+net\md_5\bungee\log\LogDispatcher.class
+net\md_5\bungee\log\LoggingForwardHandler.class

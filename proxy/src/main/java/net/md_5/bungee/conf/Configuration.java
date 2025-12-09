@@ -108,16 +108,10 @@ public class Configuration implements ProxyConfig
         preventProxyConnections = adapter.getBoolean( "prevent_proxy_connections", preventProxyConnections );
         forgeSupport = adapter.getBoolean( "forge_support", forgeSupport );
         rejectTransfers = adapter.getBoolean( "reject_transfers", rejectTransfers );
-<<<<<<< HEAD
+        maxPacketsPerSecond = adapter.getInt( "max_packets_per_second", maxPacketsPerSecond );
+        maxPacketDataPerSecond = adapter.getInt( "max_packets_data_per_second", maxPacketDataPerSecond );
+        
         OfflinePlayerPrefix = adapter.getString( "OfflinePlayerPrefix", OfflinePlayerPrefix );
-
-        maxPacketsPerSecond = adapter.getInt( "max_packets_per_second", maxPacketsPerSecond );
-        maxPacketDataPerSecond = adapter.getInt( "max_packets_data_per_second", maxPacketDataPerSecond );
-
-=======
-        maxPacketsPerSecond = adapter.getInt( "max_packets_per_second", maxPacketsPerSecond );
-        maxPacketDataPerSecond = adapter.getInt( "max_packets_data_per_second", maxPacketDataPerSecond );
->>>>>>> 6f13c2d6b6e7ea07382ab8c66d68865b6ffc20ea
 
         disabledCommands = new CaseInsensitiveSet( (Collection<String>) adapter.getList( "disabled_commands", Arrays.asList( "disabledcommandhere" ) ) );
 
