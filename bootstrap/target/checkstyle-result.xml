@@ -1,3 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <checkstyle version="8.45.1">
+<<<<<<< HEAD
+=======
+<file name="D:\downloads\Bungee_git\bootstrap\src\main\java\net\md_5\bungee\Bootstrap.java">
+</file>
+>>>>>>> 9257d8f629d7b0f8e6ec26639723c69ec4b8ff5c
 </checkstyle>

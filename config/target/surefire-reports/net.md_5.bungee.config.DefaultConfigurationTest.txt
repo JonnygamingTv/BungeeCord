@@ -1,4 +1,8 @@
 -------------------------------------------------------------------------------
 Test set: net.md_5.bungee.config.DefaultConfigurationTest
 -------------------------------------------------------------------------------
+<<<<<<< HEAD
 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 sec
+=======
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 sec
+>>>>>>> 9257d8f629d7b0f8e6ec26639723c69ec4b8ff5c
